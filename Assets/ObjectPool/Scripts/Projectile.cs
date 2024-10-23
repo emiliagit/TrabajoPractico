@@ -4,19 +4,23 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour {
 
+    [Header("Turret Type")]
     public TurretAI.TurretType type = TurretAI.TurretType.Single;
-    public Transform target;
-    public bool lockOn;
-    //public bool track;
-    public float speed = 1;
-    public float turnSpeed = 1;
-    public bool catapult;
 
-    public float recoil = 0.1f;
-    public float boomTimer = 1;
+    [Header("Proyectile")]
+    public Transform target;
+
+    public float shootSpeed;
+    public float turnSpeed;
+    public bool catapult;
+    public bool lockOn;
+
+    [Header("Explosion")]
+    public float recoil;
+    public float explosionTimer;
     public ParticleSystem explosion;
 
-    
+
     private void Start()
     {
         if (catapult)
@@ -34,54 +38,60 @@ public class Projectile : MonoBehaviour {
 
     private void Update()
     {
-        if (target == null)
+        explosionTimer -= Time.deltaTime;
+        CheckForExplosion();
+
+        HandleCatapult();
+        HandleDual();
+        HandleSingle();
+
+    }
+
+    void CheckForExplosion()
+    {
+        if (target == null || transform.position.y < -0.2F || explosionTimer < 0)
         {
             Explosion();
             return;
         }
+    }
 
-        if (transform.position.y < -0.2F)
-        {
-            Explosion();
-        }
-
-        boomTimer -= Time.deltaTime;
-
-        if (boomTimer < 0)
-        {
-            Explosion();
-        }
-
+    void HandleCatapult()
+    {
         if (type == TurretAI.TurretType.Catapult)
         {
             if (lockOn)
             {
-                Vector3 Vo = CalculateCatapult(target.transform.position, transform.position, 1);
-
-                transform.GetComponent<Rigidbody>().velocity = Vo;
+                Vector3 velocity = CalculateCatapult(target.transform.position, transform.position, 1);
+                transform.GetComponent<Rigidbody>().velocity = velocity;
                 lockOn = false;
             }
         }
-        else if (type == TurretAI.TurretType.Dual)
+        
+    }
+
+    void HandleDual()
+    {
+        if (type == TurretAI.TurretType.Dual)
         {
             Vector3 dir = target.position - transform.position;
-           
             Vector3 newDirection = Vector3.RotateTowards(transform.forward, dir, Time.deltaTime * turnSpeed, 0.0f);
             Debug.DrawRay(transform.position, newDirection, Color.red);
-
-            
-            transform.Translate(Vector3.forward * Time.deltaTime * speed);
+            transform.Translate(Vector3.forward * Time.deltaTime * shootSpeed);
             transform.rotation = Quaternion.LookRotation(newDirection);
-
         }
-        else if (type == TurretAI.TurretType.Single)
+    }
+
+    void HandleSingle()
+    {
+        if (type == TurretAI.TurretType.Single)
         {
-            float singleSpeed = speed * Time.deltaTime;
+            float singleSpeed = shootSpeed * Time.deltaTime;
             transform.Translate(transform.forward * singleSpeed * 2, Space.World);
         }
     }
 
-    
+
 
     Vector3 CalculateCatapult(Vector3 target, Vector3 origen, float time)
     {
