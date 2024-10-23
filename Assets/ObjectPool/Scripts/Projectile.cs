@@ -30,8 +30,8 @@ public class Projectile : MonoBehaviour {
 
         if (type == TurretAI.TurretType.Single)
         {
-            Vector3 dir = target.position - transform.position;
-            transform.rotation = Quaternion.LookRotation(dir);
+            Vector3 direction = target.position - transform.position;
+            transform.rotation = Quaternion.LookRotation(direction);
         }
     }
    
