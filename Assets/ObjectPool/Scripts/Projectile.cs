@@ -5,7 +5,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour {
 
     [Header("Turret Type")]
-    public TurretAI.TurretType type = TurretAI.TurretType.Single;
+    [SerializeField] private TurretAI.TurretType turretType;
 
     [Header("Proyectile")]
     public Transform target;
@@ -21,14 +21,14 @@ public class Projectile : MonoBehaviour {
     public ParticleSystem explosion;
 
 
-    private void Start()
+    private void OnEnable()
     {
         if (catapult)
         {
             lockOn = true;
         }
 
-        if (type == TurretAI.TurretType.Single)
+        if (turretType == TurretAI.TurretType.Single)
         {
             Vector3 direction = target.position - transform.position;
             transform.rotation = Quaternion.LookRotation(direction);
@@ -58,7 +58,7 @@ public class Projectile : MonoBehaviour {
 
     void HandleCatapult()
     {
-        if (type == TurretAI.TurretType.Catapult)
+        if (turretType == TurretAI.TurretType.Catapult)
         {
             if (lockOn)
             {
@@ -72,7 +72,7 @@ public class Projectile : MonoBehaviour {
 
     void HandleDual()
     {
-        if (type == TurretAI.TurretType.Dual)
+        if (turretType == TurretAI.TurretType.Dual)
         {
             Vector3 dir = target.position - transform.position;
             Vector3 newDirection = Vector3.RotateTowards(transform.forward, dir, Time.deltaTime * turnSpeed, 0.0f);
@@ -84,7 +84,7 @@ public class Projectile : MonoBehaviour {
 
     void HandleSingle()
     {
-        if (type == TurretAI.TurretType.Single)
+        if (turretType == TurretAI.TurretType.Single)
         {
             float singleSpeed = shootSpeed * Time.deltaTime;
             transform.Translate(transform.forward * singleSpeed * 2, Space.World);

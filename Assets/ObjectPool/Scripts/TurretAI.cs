@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+
+
 
 public class TurretAI : MonoBehaviour {
+
 
     public enum TurretType
     {
@@ -10,7 +11,8 @@ public class TurretAI : MonoBehaviour {
         Dual = 2,
         Catapult = 3,
     }
-    
+
+
     public GameObject currentTarget;
     public Transform turreyHead;
 
@@ -20,13 +22,13 @@ public class TurretAI : MonoBehaviour {
     private float timer;
     public float loockSpeed;
 
-   
+    //public Quaternion randomRot;
     public Vector3 randomRot;
     public Animator animator;
 
     [Header("[Turret Type]")]
-    public TurretType turretType = TurretType.Single;
-    
+    [SerializeField] private TurretType turretType;
+
     public Transform muzzleMain;
     public Transform muzzleSub;
     public GameObject muzzleEff;
@@ -35,16 +37,11 @@ public class TurretAI : MonoBehaviour {
 
     private Transform lockOnPos;
 
-   
 
     void Start () {
-        InvokeRepeating("ChackForTarget", 0, 0.5f);
-        
+        InvokeRepeating(nameof(CheckForTarget), 0, 0.5f);
 
-        if (transform.GetChild(0).GetComponent<Animator>())
-        {
-            animator = transform.GetChild(0).GetComponent<Animator>();
-        }
+        animator = transform.GetChild(0).GetComponent<Animator>();
 
         randomRot = new Vector3(0, Random.Range(0, 359), 0);
     }
@@ -54,8 +51,7 @@ public class TurretAI : MonoBehaviour {
         {
             FollowTarget();
 
-            float currentTargetDist = Vector3.Distance(transform.position, currentTarget.transform.position);
-            if (currentTargetDist > attackDist)
+            if (DistanceToTarget() > attackDist)
             {
                 currentTarget = null;
             }
@@ -85,20 +81,27 @@ public class TurretAI : MonoBehaviour {
         }
 	}
 
-    private void ChackForTarget()
+    float DistanceToTarget()
     {
-        Collider[] colls = Physics.OverlapSphere(transform.position, attackDist);
-        float distAway = Mathf.Infinity;
+        float currentTargetDist = Vector3.Distance(transform.position, currentTarget.transform.position);
+        return currentTargetDist;
 
-        for (int i = 0; i < colls.Length; i++)
+    }
+
+    private void CheckForTarget()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, attackDist);
+        float distanceAway = Mathf.Infinity;
+
+        foreach (var collider in colliders)
         {
-            if (colls[i].tag == "Player")
+            if (collider.tag == "Player")
             {
-                float dist = Vector3.Distance(transform.position, colls[i].transform.position);
-                if (dist < distAway)
+                float distance = Vector3.Distance(transform.position, collider.transform.position);
+                if (distance < distanceAway)
                 {
-                    currentTarget = colls[i].gameObject;
-                    distAway = dist;
+                    currentTarget = collider.gameObject;
+                    distanceAway = distance;
                 }
             }
         }
@@ -106,16 +109,16 @@ public class TurretAI : MonoBehaviour {
 
     private void FollowTarget() 
     {
-        Vector3 targetDir = currentTarget.transform.position - turreyHead.position;
-        targetDir.y = 0;
+        Vector3 targetDirection = currentTarget.transform.position - turreyHead.position;
+        targetDirection.y = 0;
        
         if (turretType == TurretType.Single)
         {
-            turreyHead.forward = targetDir;
+            turreyHead.forward = targetDirection;
         }
         else
         {
-            turreyHead.transform.rotation = Quaternion.RotateTowards(turreyHead.rotation, Quaternion.LookRotation(targetDir), loockSpeed * Time.deltaTime);
+            turreyHead.transform.rotation = Quaternion.RotateTowards(turreyHead.rotation, Quaternion.LookRotation(targetDirection), loockSpeed * Time.deltaTime);
         }
     }
 

@@ -4995,7 +4995,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66749fef3309f654791e063c70ce1ca3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 3
+  turretType: 3
   target: {fileID: 0}
   shootSpeed: 10
   turnSpeed: 1
