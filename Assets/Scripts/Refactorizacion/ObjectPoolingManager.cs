@@ -27,7 +27,7 @@ public class ObjectPoolingManager : MonoBehaviour
     [SerializeField] private List<PoolInfo> listOfPools;
     [SerializeField] private Vector3 defaultObjectPosition;
 
-    public static PoolManager Instance { get; private set; }
+    public static ObjectPoolingManager Instance { get; private set; }
 
     private void Awake()
     {

@@ -4997,6 +4997,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turretType: 3
   target: {fileID: 0}
+  objectType: 2
   shootSpeed: 10
   turnSpeed: 1
   catapult: 1

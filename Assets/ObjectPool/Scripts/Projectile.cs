@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour {
@@ -9,6 +10,8 @@ public class Projectile : MonoBehaviour {
 
     [Header("Proyectile")]
     public Transform target;
+    public Transform Target { get => target; set => target = value; }
+    [SerializeField] private PoolObjectType objectType;
 
     public float shootSpeed;
     public float turnSpeed;
@@ -30,11 +33,11 @@ public class Projectile : MonoBehaviour {
 
         if (turretType == TurretAI.TurretType.Single)
         {
-            Vector3 direction = target.position - transform.position;
-            transform.rotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.LookRotation(SetDirection());
         }
     }
-   
+    
+
 
     private void Update()
     {
@@ -62,7 +65,7 @@ public class Projectile : MonoBehaviour {
         {
             if (lockOn)
             {
-                Vector3 velocity = CalculateCatapult(target.transform.position, transform.position, 1);
+                Vector3 velocity = CalculateCatapultSpped(target.transform.position, transform.position, 1);
                 transform.GetComponent<Rigidbody>().velocity = velocity;
                 lockOn = false;
             }
@@ -92,8 +95,23 @@ public class Projectile : MonoBehaviour {
     }
 
 
+    private Vector3 SetDirection()
+    {
+        if (target == null)
+            return Vector3.zero;
 
-    Vector3 CalculateCatapult(Vector3 target, Vector3 origen, float time)
+        Vector3 newDirection = target.position - transform.position;
+
+        return newDirection.normalized;
+    }
+    public void SetRotation()
+    {
+        transform.rotation = Quaternion.LookRotation(SetDirection());
+    }
+
+
+
+    Vector3 CalculateCatapultSpped(Vector3 target, Vector3 origen, float time)
     {
         Vector3 distanceToTarget = target - origen;
         distanceToTarget.y = 0;
@@ -132,6 +150,6 @@ public class Projectile : MonoBehaviour {
     public void Explosion()
     {
         Instantiate(explosion, transform.position, transform.rotation);
-        Destroy(gameObject);
+        ObjectPoolingManager.Instance.CoolObject(gameObject, objectType);
     }
 }

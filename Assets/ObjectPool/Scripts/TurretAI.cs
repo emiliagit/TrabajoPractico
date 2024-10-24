@@ -23,38 +23,42 @@ public class TurretAI : MonoBehaviour {
     public float shootCoolDown;
     private float timer;
     public float loockSpeed;
+    private float nextTimeToShoot;
     [SerializeField] private float shotCoolDown;
+    [SerializeField] private PoolObjectType bulletType;
 
-
-    public Vector3 randomRot;
+    private Vector3 randomRotation;
 
   
     [Header ("referencias")]
     public Transform muzzleMain;
     public Transform muzzleSub;
     private Transform lockOnPos;
-    public Transform turreyHead;
+    public Transform turretHead;
     private Transform lockOnPosition;
-
-
-    public GameObject muzzleEff;
+    public GameObject muzzleEffect;
     public GameObject bullet;
     public GameObject currentTarget;
-
     public Animator animator;
 
     private bool shootLeft = true;
-    private float nextTimeToShoot;
+   
 
 
 
 
-    void Start () {
+    void Start () 
+    {
         InvokeRepeating(nameof(CheckForTarget), 0, 0.5f);
 
-        animator = transform.GetChild(0).GetComponent<Animator>();
+        if (turretHead.TryGetComponent<Animator>(out Animator component))
+        {
+            animator = component;
+        }
 
-        randomRot = new Vector3(0, Random.Range(0, 359), 0);
+        randomRotation = new Vector3(0, Random.Range(0, 359), 0);
+
+        nextTimeToShoot = Time.time;
     }
 	
 	void Update () {
@@ -72,13 +76,15 @@ public class TurretAI : MonoBehaviour {
             IdleRitate();
         }
 
-        ShootCheckTrigger();
+        Checktrigger();
 
         if (Input.GetMouseButtonDown(0))
         {
             Transform player = GameObject.FindWithTag("Player").transform;
             ProjectileThrow(muzzleMain, player);
         }
+
+        
     }
 
     float DistanceToTarget()
@@ -88,7 +94,7 @@ public class TurretAI : MonoBehaviour {
 
     }
 
-    private void ShootCheckTrigger()
+   void Checktrigger()
     {
         if (currentTarget == null) return;
 
@@ -124,28 +130,20 @@ public class TurretAI : MonoBehaviour {
 
     private void FollowTarget() 
     {
-        Vector3 targetDirection = currentTarget.transform.position - turreyHead.position;
+        Vector3 targetDirection = currentTarget.transform.position - turretHead.position;
         targetDirection.y = 0;
        
         if (turretType == TurretType.Single)
         {
-            turreyHead.forward = targetDirection;
+            turretHead.forward = targetDirection;
         }
         else
         {
-            turreyHead.transform.rotation = Quaternion.RotateTowards(turreyHead.rotation, Quaternion.LookRotation(targetDirection), loockSpeed * Time.deltaTime);
+            turretHead.transform.rotation = Quaternion.RotateTowards(turretHead.rotation, Quaternion.LookRotation(targetDirection), loockSpeed * Time.deltaTime);
         }
     }
 
-    private void ShootTrigger()
-    {
-       
-        Shoot(currentTarget);
-        
-    }
     
-   
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
@@ -154,27 +152,19 @@ public class TurretAI : MonoBehaviour {
 
     public void IdleRitate()
     {
-        bool refreshRandom = false;
-        
-        if (turreyHead.rotation != Quaternion.Euler(randomRot))
+        if (turretHead.rotation != Quaternion.Euler(randomRotation))
         {
-            turreyHead.rotation = Quaternion.RotateTowards(turreyHead.transform.rotation, Quaternion.Euler(randomRot), loockSpeed * Time.deltaTime * 0.2f);
+            turretHead.rotation = Quaternion.RotateTowards(turretHead.transform.rotation, Quaternion.Euler(randomRotation), loockSpeed * Time.deltaTime * 0.2f);
         }
         else
         {
-            refreshRandom = true;
-
-            if (refreshRandom)
-            {
-
-                int randomAngle = Random.Range(0, 359);
-                randomRot = new Vector3(0, randomAngle, 0);
-                refreshRandom = false;
-            }
+            int randomAngle = Random.Range(0, 359);
+            randomRotation = new Vector3(0, randomAngle, 0);
+              
         }
     }
 
-    public void Shoot(GameObject go)
+    public void Shoot(GameObject target)
     {
         if (turretType == TurretType.Catapult)
         {
