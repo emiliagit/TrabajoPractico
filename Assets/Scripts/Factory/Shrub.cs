@@ -2,17 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shrub : MonoBehaviour
+public class Shrub : Factory
 {
-    // Start is called before the first frame update
-    void Start()
+    public override string propName => "Shrub";
+    public override void Activate()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        Destroy(gameObject, durationTime);
     }
 }
+
